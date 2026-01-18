@@ -2112,6 +2112,17 @@
         function navigateTo(pageId, event) {
             if (event) event.preventDefault();
 
+            // Update URL hash without triggering hashchange event
+            if (window.location.hash !== '#' + pageId) {
+                window.location.hash = pageId;
+            } else {
+                // If hash is already set, manually trigger the page change
+                showPage(pageId);
+            }
+        }
+
+        // Function to show a specific page
+        function showPage(pageId) {
             // Hide all pages
             document.querySelectorAll('.page-section').forEach(page => {
                 page.classList.remove('active');
@@ -2127,8 +2138,12 @@
             // Update navigation active state
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.classList.remove('active');
+                // Check if this link points to the current page
+                const linkHref = link.getAttribute('onclick');
+                if (linkHref && linkHref.includes("'" + pageId + "'")) {
+                    link.classList.add('active');
+                }
             });
-            event.target.classList.add('active');
 
             // Close mobile menu if open
             const mobileMenu = document.querySelector('.main-nav');
@@ -2138,6 +2153,13 @@
                 menuToggle.classList.remove('active');
             }
         }
+
+        // Handle browser back/forward buttons
+        window.addEventListener('hashchange', function () {
+            const hash = window.location.hash.substring(1); // Remove the '#'
+            const pageId = hash || 'home-page'; // Default to home if no hash
+            showPage(pageId);
+        });
 
         // MOBILE MENU TOGGLE
         function toggleMobileMenu() {
@@ -2255,6 +2277,15 @@ I would like to book a consultation with you.
         document.addEventListener('DOMContentLoaded', function () {
             // Set current year in footer
             document.getElementById('year').textContent = new Date().getFullYear();
+
+            // Initialize page based on URL hash
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                showPage(hash);
+            } else {
+                // Default to home page
+                showPage('home-page');
+            }
         });
     </script>
 
